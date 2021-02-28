@@ -1,4 +1,5 @@
 import Head from 'next/head';
+import { GetServerSideProps } from 'next';
 
 import { CompletedChallenges } from "../components/CompletedChallenges";
 import { Countdown } from "../components/Countdown";
@@ -8,29 +9,48 @@ import { ChallengeBox } from "../components/ChallengeBox";
 
 import styles from '../styles/pages/Home.module.css';
 import { CountdownProvider } from '../contexts/CountdownContext';
+import { ChallengesProvider } from '../contexts/ChallengesContexts';
 
-
-export default function Home() {
+export default function Home(props) {
   return (
-    <div className={styles.container}>
-      <Head>
-        <title>Inicio | move.it</title>
-      </Head>
+    <ChallengesProvider
+      level={props.level}
+      currentExperience={props.currentExperience}
+      challengesCompleted={props.challengesCompleted}
+    >
+      <div className={styles.container}>
+        <Head>
+          <title>Inicio | move.it</title>
+        </Head>
 
-      <ExperienceBar />
-    
-      <CountdownProvider>
-        <section>
-         <div>
-            <Profile />
-            <CompletedChallenges />
-            <Countdown />
-          </div>
+        <ExperienceBar />
+      
+        <CountdownProvider>
+          <section>
           <div>
-            <ChallengeBox />
-          </div>
-        </section>
-      </CountdownProvider>
-  </div>
+              <Profile />
+              <CompletedChallenges />
+              <Countdown />
+            </div>
+            <div>
+              <ChallengeBox />
+            </div>
+          </section>
+        </CountdownProvider>
+      </div>
+    </ChallengesProvider>
   )
+}
+// Chamada API para o SEO (indexação dos buscadores)
+export const getServerSideProps: GetServerSideProps = async (ctx) => {
+  // chamada API
+  const { level, currentExperience, challengesCompleted } = ctx.req.cookies; 
+
+  return {
+    props: {
+      level: Number(level),
+      currentExperience: Number(currentExperience),
+      challengesCompleted: Number(challengesCompleted)
+    }
+  }
 }
